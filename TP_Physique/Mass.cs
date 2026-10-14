@@ -9,10 +9,6 @@ namespace TP_Physique
         public Vector2 position;
         public Vector2 acceleration;
 
-        public void ApplyForces(Vector2 force)
-        {
-            acceleration += force / mass;
-        }
         public Mass(float mass, Vector2 position)
         {
             this.mass = mass;
