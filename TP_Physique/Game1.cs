@@ -10,13 +10,28 @@ namespace TP_Physique
         private SpriteBatch _spriteBatch;
         Texture2D pixel;
 
-
+        /// <summary>
+        /// Gavité
+        /// </summary>
         readonly Vector2 GRAVITY = new Vector2(0, 9.81f);
+
+        /// <summary>
+        /// Pendule
+        /// </summary>
         public Mass mass = new Mass(5, new Vector2(3,3));
+
+        /// <summary>
+        /// Point de pivot
+        /// </summary>
         public Vector2 pivot = new Vector2(8,3);
 
+        /// <summary>
+        /// Tolérance pour la distance
+        /// </summary>
         public float epsilon = 0.00001f;
-
+        /// <summary>
+        /// Distance maximal entre le pivot et le pendule
+        /// </summary>
         public float max_distance = 5;
 
 
@@ -49,37 +64,41 @@ namespace TP_Physique
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                {
-                Vector2 fromPivot = mass.position - pivot;
+            { }
+            // Calcul du vecteur qui va du pendule au pivot
+            Vector2 fromPivot = mass.position - pivot;
+
+            // deltatime
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Scalaire entre 
+            float dot = Vector2.Dot(fromPivot, GRAVITY);
+
+            // Tension = 
+            Vector2 tension = -(dot/ fromPivot.LengthSquared()) * fromPivot;
+
+            // Coups de baguette magique
+            tension *= 3;
+
+            // Calcul de l'accélération
+            mass.acceleration = GRAVITY + tension;
+
+            // Calcul de la vitesse
+            mass.velocity += mass.acceleration * dt;
+
+            // Calcul de la position
+            mass.position += mass.velocity * dt;
 
 
-                float distance = fromPivot.Length();
-
-
-                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-
-                float dot = Vector2.Dot(fromPivot, GRAVITY);
-
-
-                Vector2 tension = -(dot/ fromPivot.LengthSquared()) * fromPivot;
-
-
-                mass.acceleration = GRAVITY + tension*3;
-
-                mass.velocity += mass.acceleration * dt;
-                mass.position += mass.velocity * dt;
-
-                fromPivot = mass.position - pivot;
-
-                distance = fromPivot.Length();
-
-                if (distance > max_distance+ epsilon || distance < max_distance- epsilon)
-                {
-                    mass.position = pivot + Vector2.Normalize(fromPivot) * max_distance;
-                }
-
+            // Correcteur pour évité que le pendule s'éloigne de la tige
+            fromPivot = mass.position - pivot;
+            float distance = fromPivot.Length();
+            if (distance > max_distance+ epsilon || distance < max_distance- epsilon)
+            {
+                mass.position = pivot + Vector2.Normalize(fromPivot) * max_distance;
             }
+
+            
 
 
             base.Update(gameTime);
